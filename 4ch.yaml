@@ -1,10 +1,10 @@
 substitutions:
-  device_name: "iotcasa-2gang-switch"
+  device_name: "iotcasa-4gang-switch"
   friendly_name: ""
   room: ""
-  project_name: "IOTCasa.2 Gang Switch"
-  project_version: "1.2"
-  device_description: "IOTCasa 2 Gang Switch"
+  project_name: "IOTCasa.4 Gang Switch"
+  project_version: "1.3"
+  device_description: "IOTCasa 4 Gang Switch"
   relay_restore_mode: RESTORE_DEFAULT_OFF
   wifi_fast_connect: "False"
 
@@ -20,8 +20,7 @@ esphome:
     version: "${project_version}"
 
 esp8266:
-  board: esp07s
-  early_pin_init: False
+  board: esp12e
   restore_from_flash: True
 
 preferences:
@@ -33,6 +32,7 @@ ota:
   - platform: esphome
 
 logger:
+  baud_rate : 0
   level : ERROR
 
 mdns:
@@ -59,13 +59,15 @@ wifi:
 captive_portal:
 
 dashboard_import:
-  package_import_url: github://mahipat99/iotcasa-configs/2ch.yaml
+  package_import_url: github://mahipat99/iotcasa-configs/4ch.yaml
 
 light:
   - platform: status_led
     name: "Status LED"
     disabled_by_default: True
-    pin: GPIO2
+    pin:
+      number: GPIO2
+      inverted: True
 
 button:
   - platform: restart
@@ -82,14 +84,24 @@ switch:
     name: "Relay 1"
     id: relay_1
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO12
+    pin: GPIO15
     icon: mdi:light-switch
   - platform: gpio
     name: "Relay 2"
     id: relay_2
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO13
+    pin: GPIO04
     icon: mdi:lightbulb
+  - platform: gpio
+    name: "Relay 3"
+    id: relay_3
+    pin: GPIO14
+    icon: mdi:ceiling-light-outline
+  - platform: gpio
+    name: "Relay 4"
+    id: relay_4
+    pin: GPIO13
+    icon: mdi:ceiling-fan
 
 binary_sensor:
   - platform: status
@@ -101,7 +113,6 @@ binary_sensor:
       number: GPIO0
       mode: input_pullup
       inverted: True
-    icon: 'mdi:button-pointer'
     filters:
       - delayed_on_off: 50ms
     disabled_by_default: True
@@ -118,7 +129,7 @@ binary_sensor:
 
   - platform: gpio
     name: "Switch 1"
-    pin: GPIO16
+    pin: GPIO03
     on_press:
       - switch.turn_on: relay_1
     on_release:
@@ -127,10 +138,28 @@ binary_sensor:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 2"
-    pin: GPIO14
+    pin: GPIO05
     on_press:
       - switch.turn_on: relay_2
     on_release:
       - switch.turn_off: relay_2
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 3"
+    pin: GPIO016
+    on_press:
+      - switch.turn_on: relay_3
+    on_release:
+      - switch.turn_off: relay_3
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 4"
+    pin: GPIO012
+    on_press:
+      - switch.turn_on: relay_4
+    on_release:
+      - switch.turn_off: relay_4
     filters:
       - delayed_on_off: 50ms
