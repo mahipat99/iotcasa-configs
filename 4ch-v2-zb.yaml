@@ -1,0 +1,451 @@
+substitutions:
+  device_name: "iotcasa-4gangv2zb-switch"
+  friendly_name: ""
+  room: ""
+  project_name: "IOTCasa.4 Gang V2 ZB Switch"
+  project_version: "1.3"
+  device_description: "IOTCasa 4 Gang V2 ZB Switch"
+  relay_restore_mode: RESTORE_DEFAULT_OFF
+  wifi_fast_connect: "False"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  area: "${room}"
+  comment: ${device_description}
+  name_add_mac_suffix: True
+  min_version: 2026.6.0
+  project:
+    name: "${project_name}"
+    version: "${project_version}"
+  on_boot:
+    priority: -100
+    then:
+      - if:
+          condition: wifi.enabled
+          then:
+            zigbee.setAttr:
+              id: attr_wifi_state
+              value: True
+          else:
+            zigbee.setAttr:
+              id: attr_wifi_state
+              value: False
+      - zigbee.reportAttr: attr_wifi_state
+
+esp32:
+  variant: esp32c6
+  flash_size: 4MB
+  partitions: components/partitions_zb.csv
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESPTOOLPY_FLASHSIZE_4MB: y
+
+external_components:
+  - source: github://luar123/zigbee_esphome
+    components: [zigbee]
+
+preferences:
+  flash_write_interval: 1min
+
+api:
+
+ota:
+  - platform: esphome
+
+logger:
+  baud_rate: 0
+  level: ERROR
+  hardware_uart: UART0
+
+mdns:
+  disabled: False
+
+web_server:
+  port: 80
+
+interval:
+  - interval: 5min
+    then:
+      - zigbee.report: zb
+
+zigbee:
+  name: diy-4gang
+  manufacturer: "IOTCasa"
+  id: "zb"
+  router: true
+  power_supply: 1
+  endpoints:
+    # Switch used to report and control Wi-Fi state
+    - num: 1
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_wifi_state
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - if:
+                      condition:
+                        lambda: |-
+                          return (bool)x;
+                      then:
+                        - wifi.enable:
+                        - zigbee.setAttr:
+                            id: attr_wifi_state
+                            value: True
+                      else:
+                        - wifi.disable:
+                        - zigbee.setAttr:
+                            id: attr_wifi_state
+                            value: False
+                  - zigbee.reportAttr: attr_wifi_state
+
+    # Relay 1
+    - num: 2
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_relay1_state
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - switch.control:
+                      id: relay_1
+                      state: !lambda "return (bool)x;"
+
+    # Relay 2
+    - num: 3
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_relay2_state
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - switch.control:
+                      id: relay_2
+                      state: !lambda "return (bool)x;"
+
+    # Relay 3
+    - num: 4
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_relay3_state
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - switch.control:
+                      id: relay_3
+                      state: !lambda "return (bool)x;"
+
+    # Relay 4
+    - num: 5
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_relay4_state
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - switch.control:
+                      id: relay_4
+                      state: !lambda "return (bool)x;"
+    # Switch 1 input
+    - num: 6
+      device_type: SIMPLE_SENSOR
+      clusters:
+        - id: BINARY_INPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_switch1_state
+              type: bool
+              report: True
+
+    # Switch 2 input
+    - num: 7
+      device_type: SIMPLE_SENSOR
+      clusters:
+        - id: BINARY_INPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_switch2_state
+              type: bool
+              report: True
+
+    # Switch 3 input
+    - num: 8
+      device_type: SIMPLE_SENSOR
+      clusters:
+        - id: BINARY_INPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_switch3_state
+              type: bool
+              report: True
+
+    # Switch 4 input
+    - num: 9
+      device_type: SIMPLE_SENSOR
+      clusters:
+        - id: BINARY_INPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_switch4_state
+              type: bool
+              report: True
+    # Status LED             
+    - num: 10
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_led_state
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - light.control:
+                      id: led
+                      state: !lambda "return (bool)x;"
+    # Restart button (momentary pulse)
+    - num: 11
+      device_type: ON_OFF_OUTPUT
+      clusters:
+        - id: BINARY_OUTPUT
+          role: SERVER
+          attributes:
+            - attribute_id: 0x0055
+              id: attr_restart_btn
+              type: bool
+              report: True
+              on_value:
+                then:
+                  - if:
+                      condition:
+                        lambda: "return (bool)x;"
+                      then:
+                        - button.press: button_restart
+                        - delay: 1s
+                        - zigbee.setAttr: {id: attr_restart_btn, value: False}
+                        - zigbee.reportAttr: attr_restart_btn
+  on_join:
+    then:
+      - logger.log: "Joined network"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: "${wifi_fast_connect}"
+  enable_on_boot: True # can also be enabled via Zigbee attr_wifi_state or a button
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  reboot_timeout: 5min
+
+captive_portal:
+
+dashboard_import:
+  package_import_url: github://mahipat99/iotcasa-configs/4ch-v2-zb.yaml
+
+light:
+  - platform: status_led
+    id: led
+    name: "Status LED"
+    disabled_by_default: True
+    pin:
+      number: GPIO15
+      inverted: False
+
+button:
+  - platform: restart
+    name: "Restart"
+    id: button_restart
+  - platform: factory_reset
+    name: "Factory Reset"
+    id: Reset
+    disabled_by_default: True
+
+switch:
+  - platform: gpio
+    name: "Relay 1"
+    id: relay_1
+    restore_mode: "${relay_restore_mode}"
+    pin: GPIO18
+    icon: mdi:light-switch
+    on_turn_on:
+      - zigbee.setAttr:
+          id: attr_relay1_state
+          value: True
+      - zigbee.reportAttr: attr_relay1_state
+    on_turn_off:
+      - zigbee.setAttr:
+          id: attr_relay1_state
+          value: False
+      - zigbee.reportAttr: attr_relay1_state
+
+  - platform: gpio
+    name: "Relay 2"
+    id: relay_2
+    restore_mode: "${relay_restore_mode}"
+    pin: GPIO19
+    icon: mdi:lightbulb
+    on_turn_on:
+      - zigbee.setAttr:
+          id: attr_relay2_state
+          value: True
+      - zigbee.reportAttr: attr_relay2_state
+    on_turn_off:
+      - zigbee.setAttr:
+          id: attr_relay2_state
+          value: False
+      - zigbee.reportAttr: attr_relay2_state
+
+  - platform: gpio
+    name: "Relay 3"
+    id: relay_3
+    pin: GPIO22
+    icon: mdi:ceiling-light-outline
+    on_turn_on:
+      - zigbee.setAttr:
+          id: attr_relay3_state
+          value: True
+      - zigbee.reportAttr: attr_relay3_state
+    on_turn_off:
+      - zigbee.setAttr:
+          id: attr_relay3_state
+          value: False
+      - zigbee.reportAttr: attr_relay3_state
+
+  - platform: gpio
+    name: "Relay 4"
+    id: relay_4
+    pin: GPIO23
+    icon: mdi:ceiling-fan
+    on_turn_on:
+      - zigbee.setAttr:
+          id: attr_relay4_state
+          value: True
+      - zigbee.reportAttr: attr_relay4_state
+    on_turn_off:
+      - zigbee.setAttr:
+          id: attr_relay4_state
+          value: False
+      - zigbee.reportAttr: attr_relay4_state
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+  - platform: gpio
+    name: "Button"
+    pin:
+      number: GPIO09
+      mode: input_pullup
+      inverted: True
+    filters:
+      - delayed_on_off: 50ms
+    disabled_by_default: True
+    on_multi_click:
+      - timing:
+          - ON for at most 0.5s
+          - OFF for at least 0.2s
+        then:
+          - switch.toggle: relay_1
+      - timing:
+          - ON for at least 4s
+        then:
+          - button.press: Reset
+  - platform: gpio
+    name: "Switch 1"
+    pin: GPIO02
+    on_press:
+      - switch.turn_on: relay_1
+      - zigbee.setAttr:
+          id: attr_switch1_state
+          value: True
+      - zigbee.reportAttr: attr_switch1_state
+    on_release:
+      - switch.turn_off: relay_1
+      - zigbee.setAttr:
+          id: attr_switch1_state
+          value: False
+      - zigbee.reportAttr: attr_switch1_state
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 2"
+    pin: GPIO03
+    on_press:
+      - switch.turn_on: relay_2
+      - zigbee.setAttr:
+          id: attr_switch2_state
+          value: True
+      - zigbee.reportAttr: attr_switch2_state
+    on_release:
+      - switch.turn_off: relay_2
+      - zigbee.setAttr:
+          id: attr_switch2_state
+          value: False
+      - zigbee.reportAttr: attr_switch2_state
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 3"
+    pin: GPIO020
+    on_press:
+      - switch.turn_on: relay_3
+      - zigbee.setAttr:
+          id: attr_switch3_state
+          value: True
+      - zigbee.reportAttr: attr_switch3_state
+    on_release:
+      - switch.turn_off: relay_3
+      - zigbee.setAttr:
+          id: attr_switch3_state
+          value: False
+      - zigbee.reportAttr: attr_switch3_state
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 4"
+    pin: GPIO021
+    on_press:
+      - switch.turn_on: relay_4
+      - zigbee.setAttr:
+          id: attr_switch4_state
+          value: True
+      - zigbee.reportAttr: attr_switch4_state
+    on_release:
+      - switch.turn_off: relay_4
+      - zigbee.setAttr:
+          id: attr_switch4_state
+          value: False
+      - zigbee.reportAttr: attr_switch4_state
+    filters:
+      - delayed_on_off: 50ms

@@ -1,10 +1,10 @@
 substitutions:
-  device_name: "iotcasa-6gang-switch"
-  friendly_name: ""
+  device_name: "iotcasa-8gang13-switch"
+  friendly_name: iotcasa-8gang1.3-switch
   room: ""
-  project_name: "IOTCasa.6 Gang Switch"
-  project_version: "1.0"
-  device_description: "IOTCasa 6 Gang Switch"
+  project_name: "IOTCasa.8 Gang Switch"
+  project_version: "1.3"
+  device_description: "IOTCasa 8 Gang Switch"
   relay_restore_mode: RESTORE_DEFAULT_OFF
   wifi_fast_connect: "False"
 
@@ -14,7 +14,7 @@ esphome:
   area: "${room}"
   comment: ${device_description}
   name_add_mac_suffix: True
-  min_version: 2024.6.0
+  min_version: 2026.8.0
   project:
     name: "${project_name}"
     version: "${project_version}"
@@ -62,13 +62,13 @@ esp32_improv:
 captive_portal:
 
 dashboard_import:
-  package_import_url: github://mahipat99/iotcasa-configs/6ch.yaml
+  package_import_url: github://mahipat99/iotcasa-configs/8ch-v1.3.yaml
 
 light:
   - platform: status_led
     name: "Status LED"
     disabled_by_default: True
-    pin: GPIO23
+    pin: GPIO27
 
 button:
   - platform: restart
@@ -84,35 +84,45 @@ switch:
     name: "Relay 1"
     id: relay_1
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO18
+    pin: GPIO14
     icon: mdi:light-switch
   - platform: gpio
     name: "Relay 2"
     id: relay_2
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO19
+    pin: GPIO13
     icon: mdi:lightbulb
   - platform: gpio
     name: "Relay 3"
     id: relay_3
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO21
+    pin: GPIO04
     icon: mdi:ceiling-light-outline
   - platform: gpio
     name: "Relay 4"
     id: relay_4
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO22
+    pin: GPIO18
   - platform: gpio
     name: "Relay 5"
     id: relay_5
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO04
+    pin: GPIO19
   - platform: gpio
     name: "Relay 6"
     id: relay_6
     restore_mode: "${relay_restore_mode}"
-    pin: GPIO13
+    pin: GPIO21
+  - platform: gpio
+    name: "Relay 7"
+    id: relay_7
+    restore_mode: "${relay_restore_mode}"
+    pin: GPIO22
+  - platform: gpio
+    name: "Relay 8"
+    id: relay_8
+    restore_mode: "${relay_restore_mode}"
+    pin: GPIO23
 
 binary_sensor:
   - platform: status
@@ -138,7 +148,7 @@ binary_sensor:
           - button.press: Reset
   - platform: gpio
     name: "Switch 1"
-    pin: GPIO34
+    pin: GPIO32
     on_press:
       - switch.turn_on: relay_1
     on_release:
@@ -156,7 +166,7 @@ binary_sensor:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 3"
-    pin: GPIO32
+    pin: GPIO33
     on_press:
       - switch.turn_on: relay_3
     on_release:
@@ -165,7 +175,7 @@ binary_sensor:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 4"
-    pin: GPIO33
+    pin: GPIO34
     on_press:
       - switch.turn_on: relay_4
     on_release:
@@ -183,10 +193,28 @@ binary_sensor:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 6"
-    pin: GPIO26
+    pin: GPIO39
     on_press:
       - switch.turn_on: relay_6
     on_release:
       - switch.turn_off: relay_6
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 7"
+    pin: GPIO26
+    on_press:
+      - switch.turn_on: relay_7
+    on_release:
+      - switch.turn_off: relay_7
+    filters:
+      - delayed_on_off: 50ms
+  - platform: gpio
+    name: "Switch 8"
+    pin: GPIO36
+    on_press:
+      - switch.turn_on: relay_8
+    on_release:
+      - switch.turn_off: relay_8
     filters:
       - delayed_on_off: 50ms

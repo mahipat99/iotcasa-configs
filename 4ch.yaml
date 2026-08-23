@@ -32,8 +32,8 @@ ota:
   - platform: esphome
 
 logger:
-  baud_rate : 0
-  level : ERROR
+  baud_rate: 0
+  level: ERROR
 
 mdns:
   disabled: False
@@ -73,7 +73,6 @@ button:
   - platform: restart
     name: "Restart"
     id: button_restart
-
   - platform: factory_reset
     name: "Factory Reset"
     id: Reset
@@ -106,7 +105,6 @@ switch:
 binary_sensor:
   - platform: status
     name: "Status"
-
   - platform: gpio
     name: "Button"
     pin:
@@ -126,7 +124,6 @@ binary_sensor:
           - ON for at least 4s
         then:
           - button.press: Reset
-
   - platform: gpio
     name: "Switch 1"
     pin: GPIO03

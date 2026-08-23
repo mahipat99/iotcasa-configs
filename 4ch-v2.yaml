@@ -1,10 +1,10 @@
 substitutions:
-  device_name: "iotcasa-6gang-switch"
+  device_name: "iotcasa-4gangv2-switch"
   friendly_name: ""
   room: ""
-  project_name: "IOTCasa.6 Gang Switch"
-  project_version: "1.0"
-  device_description: "IOTCasa 6 Gang Switch"
+  project_name: "IOTCasa.4 Gang V2 Switch"
+  project_version: "1.3"
+  device_description: "IOTCasa 4 Gang V2 Switch"
   relay_restore_mode: RESTORE_DEFAULT_OFF
   wifi_fast_connect: "False"
 
@@ -14,13 +14,13 @@ esphome:
   area: "${room}"
   comment: ${device_description}
   name_add_mac_suffix: True
-  min_version: 2024.6.0
+  min_version: 2026.6.0
   project:
     name: "${project_name}"
     version: "${project_version}"
 
 esp32:
-  board: esp32dev
+  variant: esp32c6
   framework:
     type: esp-idf
 
@@ -33,6 +33,7 @@ ota:
   - platform: esphome
 
 logger:
+  baud_rate: 0
   level: ERROR
 
 mdns:
@@ -56,19 +57,18 @@ wifi:
 #     ap_timeout: 2min
 #   reboot_timeout: 5min
 
-esp32_improv:
-  authorizer: none
-
 captive_portal:
 
 dashboard_import:
-  package_import_url: github://mahipat99/iotcasa-configs/6ch.yaml
+  package_import_url: github://mahipat99/iotcasa-configs/4ch-v2.yaml
 
 light:
   - platform: status_led
     name: "Status LED"
     disabled_by_default: True
-    pin: GPIO23
+    pin:
+      number: GPIO15
+      inverted: False
 
 button:
   - platform: restart
@@ -95,24 +95,13 @@ switch:
   - platform: gpio
     name: "Relay 3"
     id: relay_3
-    restore_mode: "${relay_restore_mode}"
-    pin: GPIO21
+    pin: GPIO22
     icon: mdi:ceiling-light-outline
   - platform: gpio
     name: "Relay 4"
     id: relay_4
-    restore_mode: "${relay_restore_mode}"
-    pin: GPIO22
-  - platform: gpio
-    name: "Relay 5"
-    id: relay_5
-    restore_mode: "${relay_restore_mode}"
-    pin: GPIO04
-  - platform: gpio
-    name: "Relay 6"
-    id: relay_6
-    restore_mode: "${relay_restore_mode}"
-    pin: GPIO13
+    pin: GPIO23
+    icon: mdi:ceiling-fan
 
 binary_sensor:
   - platform: status
@@ -120,7 +109,7 @@ binary_sensor:
   - platform: gpio
     name: "Button"
     pin:
-      number: GPIO0
+      number: GPIO09
       mode: input_pullup
       inverted: True
     filters:
@@ -138,7 +127,7 @@ binary_sensor:
           - button.press: Reset
   - platform: gpio
     name: "Switch 1"
-    pin: GPIO34
+    pin: GPIO02
     on_press:
       - switch.turn_on: relay_1
     on_release:
@@ -147,7 +136,7 @@ binary_sensor:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 2"
-    pin: GPIO35
+    pin: GPIO03
     on_press:
       - switch.turn_on: relay_2
     on_release:
@@ -156,37 +145,19 @@ binary_sensor:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 3"
-    pin: GPIO32
+    pin: GPIO020
     on_press:
       - switch.turn_on: relay_3
     on_release:
-       - switch.turn_off: relay_3
+      - switch.turn_off: relay_3
     filters:
       - delayed_on_off: 50ms
   - platform: gpio
     name: "Switch 4"
-    pin: GPIO33
+    pin: GPIO021
     on_press:
       - switch.turn_on: relay_4
     on_release:
       - switch.turn_off: relay_4
-    filters:
-      - delayed_on_off: 50ms
-  - platform: gpio
-    name: "Switch 5"
-    pin: GPIO25
-    on_press:
-      - switch.turn_on: relay_5
-    on_release:
-      - switch.turn_off: relay_5
-    filters:
-      - delayed_on_off: 50ms
-  - platform: gpio
-    name: "Switch 6"
-    pin: GPIO26
-    on_press:
-      - switch.turn_on: relay_6
-    on_release:
-      - switch.turn_off: relay_6
     filters:
       - delayed_on_off: 50ms
